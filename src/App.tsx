@@ -22,10 +22,8 @@ import { match, P } from "ts-pattern";
 import "./App.css";
 import { KeyboardSelector } from "./components/KeyboardSelector";
 import { KeymapProperties } from "./components/KeymapEditor";
-import { QuantumSettingsEditor } from "./components/QuantumSettingsEditor";
 import { MenuItemProperties, MenuSectionProperties, ViaMenuItem } from "./components/ViaMenuItem";
 import init, { xz_decompress } from "./pkg";
-import { QuantumSettingDefinition } from "./services/quantumSettings";
 import {
   ConnectionType,
   DynamicEntryCount,
@@ -80,7 +78,6 @@ function App() {
   const [customEraseDialogOpen, setCustomEraseDialogOpen] = useState(false);
   const [quantumEraseDialogOpen, setQuantumEraseDialogOpen] = useState(false);
   const vialFileInputRef = useRef<HTMLInputElement>(null);
-  const [quantumValues, setQuantumValues] = useState<{ [id: string]: number }>({});
   const [deviceList, setDeviceList] = useState<
     { name: string; index: number; connection: ConnectionType; opened: boolean }[]
   >([]);
@@ -266,23 +263,6 @@ function App() {
     } catch (error) {
       console.error("Error parsing JSON:", error);
       alert("Invalid JSON file.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const onQuantumSaveClick = async () => {
-    try {
-      setLoading(true);
-      await via.SetQuantumSettingsValue(
-        Object.entries(quantumValues).reduce((acc, value) => {
-          const idNum = QuantumSettingDefinition.map((def) => def.content)
-            .map((def) => def.map((d) => d.content))
-            .flat()
-            .find((q) => q[0] === value[0])?.[1];
-          return idNum !== undefined ? { ...acc, [idNum]: value[1] } : acc;
-        }, {}),
-      );
     } finally {
       setLoading(false);
     }
@@ -537,16 +517,6 @@ function App() {
                 }}
               ></ViaMenuItem>
             ))
-            .with({ menuType: "quantum" }, () => {
-              return (
-                <QuantumSettingsEditor
-                  via={via}
-                  onChange={(value) => {
-                    setQuantumValues(value);
-                  }}
-                ></QuantumSettingsEditor>
-              );
-            })
             .with(P._, () => <></>)
             .exhaustive()}
           {vialJson === undefined ? (
