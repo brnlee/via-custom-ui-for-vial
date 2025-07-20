@@ -21,7 +21,7 @@ import { useEffect, useRef, useState } from "react";
 import { match, P } from "ts-pattern";
 import "./App.css";
 import { KeyboardSelector } from "./components/KeyboardSelector";
-// import { KeymapEditor, KeymapProperties } from "./components/KeymapEditor";
+import { KeymapProperties } from "./components/KeymapEditor";
 import { QuantumSettingsEditor } from "./components/QuantumSettingsEditor";
 import { MenuItemProperties, MenuSectionProperties, ViaMenuItem } from "./components/ViaMenuItem";
 import init, { xz_decompress } from "./pkg";
@@ -450,64 +450,6 @@ function App() {
           </Box>
           <Divider />
           <List>
-            <div style={{ display: connected ? "block" : "none" }}>
-              <ListSubheader>Keymap</ListSubheader>
-              <List disablePadding>
-                <ListItemButton
-                  onClick={() => {
-                    setActiveMenu({ menuType: "keymap", menu: vialJson! });
-                  }}
-                >
-                  <ListItemText primary="Keymap" />
-                </ListItemButton>
-              </List>
-            </div>
-            <Divider />
-            <div style={{ display: connected ? "block" : "none" }}>
-              <ListSubheader>Quantum settings</ListSubheader>
-              <List disablePadding>
-                <ListItemButton
-                  onClick={() => {
-                    setActiveMenu({ menuType: "quantum" });
-                  }}
-                >
-                  <ListItemText primary="Quantum" />
-                </ListItemButton>
-
-                <Grid container rowSpacing={1} columnSpacing={2}>
-                  <Grid item xs={12} sm={6}>
-                    <Button
-                      sx={{
-                        width: "100%",
-                        mb: 1,
-                      }}
-                      variant="contained"
-                      color="primary"
-                      onClick={() => {
-                        onQuantumSaveClick();
-                      }}
-                    >
-                      Save quantum
-                    </Button>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Button
-                      sx={{
-                        width: "100%",
-                      }}
-                      variant="contained"
-                      color="error"
-                      onClick={() => {
-                        setQuantumEraseDialogOpen(true);
-                      }}
-                    >
-                      Erase quantum
-                    </Button>
-                  </Grid>
-                </Grid>
-              </List>
-            </div>
-            <Divider />
             <Box hidden={customMenus.length == 0}>
               <ListSubheader>Custom settings</ListSubheader>
             </Box>
