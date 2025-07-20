@@ -21,7 +21,7 @@ import { useEffect, useRef, useState } from "react";
 import { match, P } from "ts-pattern";
 import "./App.css";
 import { KeyboardSelector } from "./components/KeyboardSelector";
-import { KeymapEditor, KeymapProperties } from "./components/KeymapEditor";
+// import { KeymapEditor, KeymapProperties } from "./components/KeymapEditor";
 import { QuantumSettingsEditor } from "./components/QuantumSettingsEditor";
 import { MenuItemProperties, MenuSectionProperties, ViaMenuItem } from "./components/ViaMenuItem";
 import init, { xz_decompress } from "./pkg";
@@ -61,16 +61,16 @@ function App() {
   const [customMenus, setCustomMenus] = useState<MenuItemProperties[]>([]);
   const [activeMenu, setActiveMenu] = useState<
     | {
-        menuType: "customMenu";
-        menu: MenuSectionProperties;
-      }
+      menuType: "customMenu";
+      menu: MenuSectionProperties;
+    }
     | {
-        menuType: "keymap";
-        menu: KeymapProperties;
-      }
+      menuType: "keymap";
+      menu: KeymapProperties;
+    }
     | {
-        menuType: "quantum";
-      }
+      menuType: "quantum";
+    }
   >();
   const [customValues, setCustomValues] = useState<{ [id: string]: number }>({});
   const [customValueId, setCustomValueId] = useState<[string, number, number, number?][]>([]);
@@ -580,7 +580,7 @@ function App() {
         <Grid
           item
           xs={12}
-          md={ 9}
+          md={9}
           sx={{ pl: { xs: menuOpen ? "80%" : 5, md: 0 } }}
         >
           {match(activeMenu)
@@ -614,11 +614,11 @@ function App() {
           ) : (
             <>
               <div hidden={activeMenu?.menuType !== "keymap"}>
-                <KeymapEditor
-                  keymap={vialJson!}
-                  via={via}
+                {/* <KeymapEditor */}
+                {/* keymap={vialJson!} */}
+                {/* via={via}
                   dynamicEntryCount={dynamicEntryCount}
-                ></KeymapEditor>
+                ></KeymapEditor> */}
               </div>
             </>
           )}

@@ -48,7 +48,7 @@ export function ComboEditor(props: {
   };
 
   return (
-    <Box ref ={boundaryRef}>
+    <Box ref={boundaryRef}>
       <div>{`Edit combo ${props.comboIndex}`}</div>
       <ComboEntry
         combo={

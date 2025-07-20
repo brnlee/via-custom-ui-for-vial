@@ -75,9 +75,9 @@ type MultipleCheckboxElement = {
 
 type ShowIfElement =
   | {
-      showIf: string;
-      content: MenuElementProperties[];
-    }
+    showIf: string;
+    content: MenuElementProperties[];
+  }
   | (MenuElementProperties & { showIf: string });
 
 type MenuElementProperties =
@@ -204,9 +204,57 @@ function ViaDropDown(props: DropdownElement) {
 }
 
 function ViaColor(props: ColorElement) {
-  const handleChange = (value: string, color: MuiColorInputColors) => {
-    console.log(value);
-    props.onChange(parseInt(color.hex.slice(1), 16));
+  /**
+   * "Packing" Logic: Called when the user picks a new color.
+   * It packs H and S into a single integer with H in the low byte and S in the high byte,
+   * matching the byte order the C firmware expects.
+   */
+  const handleChange = (_: string, color: MuiColorInputColors) => {
+    console.log(`Color changed: ${color.hsv}`);
+
+    // Regex to parse "hsv(H, S%, V%)"
+    const hsvRegex = /hsv\((\d+),\s*(\d+)%/;
+    const match = color.hsv.match(hsvRegex);
+
+    if (match && match.length === 3) {
+      // Convert captured strings to integers.
+      // We must scale Hue from 0-360 to 0-255 to fit in a byte.
+      // Saturation from 0-100 to 0-255.
+      console.log(`Parsed HSV: H=${match[1]}, S=${match[2]}`);
+      const h = Math.round(parseInt(match[1], 10) * 255 / 360);
+      const s = Math.round(parseInt(match[2], 10) * 255 / 100);
+
+      // CRITICAL: Pack the integer so the C code can read it correctly.
+      // To make value_data[0] = h and value_data[1] = s, we must pack it as:
+      // value = (s << 8) | h;
+      // Low byte (value & 0xff) will be 'h'.
+      // Second byte ((value >> 8) & 0xff) will be 's'.
+      const packedValue = (s << 8) | h;
+
+      props.onChange(packedValue);
+    } else {
+      console.error("Could not parse HSV string:", color.hsv);
+    }
+  };
+
+  /**
+   * "Unpacking" Logic: This prepares the value for the MuiColorInput.
+   * It takes the packed integer and correctly extracts H (from the low byte)
+   * and S (from the high byte).
+   */
+  const unpackHsvToString = (packedValue: number): string => {
+    // Extract Hue from the LOW byte
+    const hByte = packedValue & 0xff;
+    // Extract Saturation from the HIGH byte
+    const sByte = (packedValue >> 8) & 0xff;
+
+    // Scale the byte values (0-255) back to the standard HSV ranges (0-360, 0-100)
+    const h = Math.round(hByte * 360 / 255);
+    const s = Math.round(sByte * 100 / 255);
+    const v = 100; // Use a fixed value for brightness
+
+    // Reconstruct the string for the color picker
+    return `hsv(${h}, ${s}%, ${v}%)`;
   };
   return (
     <>
@@ -216,11 +264,7 @@ function ViaColor(props: ColorElement) {
       <Grid item xs={9}>
         <FormControl fullWidth>
           <MuiColorInput
-            value={{
-              r: (props.value >> 16) & 0xff,
-              g: (props.value >> 8) & 0xff,
-              b: props.value & 0xff,
-            }}
+            value={unpackHsvToString(props.value)}
             onChange={handleChange}
             format="rgb"
           ></MuiColorInput>
@@ -260,9 +304,9 @@ function ViaMultipleCheckbox(props: MultipleCheckboxElement) {
       typeof value === "string"
         ? (labels.find((v) => v[0] === value)?.[1] ?? 0)
         : (value as string[]).reduce(
-            (p, c) => p ^ (1 << (labels.find((v) => v[0] === c)?.[1] ?? 0)),
-            0,
-          ),
+          (p, c) => p ^ (1 << (labels.find((v) => v[0] === c)?.[1] ?? 0)),
+          0,
+        ),
     );
   };
 
